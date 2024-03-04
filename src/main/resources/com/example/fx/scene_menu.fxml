@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.HTMLEditor?>
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="600.0" prefWidth="1070.0"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.fx.Controller">
+    <children>
+        <MenuBar VBox.vgrow="NEVER">
+            <menus>
+                <Menu mnemonicParsing="false" text="Файл">
+                    <items>
+                        <MenuItem mnemonicParsing="false" accelerator="Ctrl+N" text="Новый"/>
+                        <MenuItem mnemonicParsing="false" accelerator="Ctrl+O" text="Открыть..." onAction="#openDocument"/>
+                        <Menu mnemonicParsing="false" text="Открыть недавние"/>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" text="Закрыть"/>
+                        <MenuItem mnemonicParsing="false" accelerator="Ctrl+S" text="Сохранить" onAction="#saveDocument"/>
+                        <MenuItem mnemonicParsing="false" accelerator="Ctrl+Alt+S" text="Сохранить как..."/>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" accelerator="Ctrl+P" text="Печать" onAction="#printDocument"/>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" accelerator="Alt+F4" text="Выход" onAction="#exitApplication"/>
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Правка">
+                    <items>
+                        <MenuItem mnemonicParsing="false" accelerator="Ctrl+Z" text="Отмена"/>
+                        <MenuItem mnemonicParsing="false" accelerator="Ctrl+Y" text="Повтор"/>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" accelerator="Ctrl+X" text="Вырезать"/>
+                        <MenuItem mnemonicParsing="false" accelerator="Ctrl+C" text="Копировать"/>
+                        <MenuItem mnemonicParsing="false" accelerator="Ctrl+V" text="Вставить"/>
+                        <MenuItem mnemonicParsing="false" accelerator="Del" text="Удалить"/>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" accelerator="Ctrl+A" text="Выделить все           "/>
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Справка">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="О программе...    ">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="F1" control="ANY" meta="UP" shift="UP"
+                                                    shortcut="UP"/>
+                            </accelerator>
+                        </MenuItem>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+        <HTMLEditor fx:id="htmlEditor" VBox.vgrow="ALWAYS"
+                    htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;"
+                    prefHeight="600.0" prefWidth="1070.0">
+            <VBox.margin>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+            </VBox.margin>
+        </HTMLEditor>
+    </children>
+</VBox>
