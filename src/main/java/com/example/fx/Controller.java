@@ -60,10 +60,12 @@ public class Controller implements Initializable {
     }
 
     private String generateHtmlFromDocument(XWPFDocument document) throws IOException {
+
         StringBuilder htmlBuilder = new StringBuilder();
 
         // Проходим по всем элементам документа Word
         List<XWPFParagraph> paragraphs = document.getParagraphs();
+
         for (XWPFParagraph paragraph : paragraphs) {
             String style = getParagraphStyle(paragraph);
             htmlBuilder.append("<p").append(style).append(">").append(paragraph.getText()).append("</p>");
@@ -140,7 +142,6 @@ public class Controller implements Initializable {
             }
             htmlBuilder.append("</table>");
         }
-        System.out.println("***************" + htmlBuilder);
         return htmlBuilder.toString();
     }
 
@@ -149,7 +150,6 @@ public class Controller implements Initializable {
 
         // Получаем выравнивание текста в параграфе
         ParagraphAlignment alignment = paragraph.getAlignment();
-        System.out.println("alignment " + alignment);
         switch (alignment) {
             case LEFT:
                 alignmentStyle = "text-align: left;";
@@ -170,6 +170,17 @@ public class Controller implements Initializable {
         return alignmentStyle;
     }
 
+    // Метод для получения уровня отступа абзаца
+    private int getIndentationLevel(XWPFParagraph paragraph) {
+        // Получаем отступ в твипсах (1/20 дюйма)
+        int indentationInTwips = paragraph.getIndentationLeft();
+        // 1 дюйм = 1440 твипсов
+        double indentationInInches = indentationInTwips / 1440.0;
+        // Преобразуем дюймы в пиксели (предполагая 96 пикселей на дюйм)
+        int indentationInPixels = (int) (indentationInInches * 96);
+        return indentationInPixels;
+    }
+
     private int getColspan(XWPFTableCell cell) {
         // Получаем XML-элемент таблицы ячейки
         CTTc ctTc = cell.getCTTc();
@@ -188,170 +199,44 @@ public class Controller implements Initializable {
 
 
     private String getParagraphStyle(XWPFParagraph paragraph) {
+
         StringBuilder style = new StringBuilder();
 
-        // Получаем стиль параграфа
         List<XWPFRun> runs = paragraph.getRuns();
         if (!runs.isEmpty()) {
-            // Получаем первый объект XWPFRun из параграфа
-            XWPFRun run = runs.get(0);
-            // Получаем размер шрифта
-            int fontSize = run.getFontSize();
-            if (fontSize > 0) {
-                style.append("font-size:").append(fontSize).append("pt;");
-            }
-            // Получаем название шрифта
-            String fontFamily = run.getFontFamily();
-            if (fontFamily != null && !fontFamily.isEmpty()) {
-                style.append("font-family:").append(fontFamily).append(";");
-            }
-            // Проверяем стили текста
-            boolean isBold = false;
-            boolean isItalic = false;
-            boolean isStrikeThrough = false;
-
-            for (XWPFRun runF : runs) {
-                if (runF.isBold()) {
-                    isBold = true;
+            for (XWPFRun run : runs) {
+                String text = run.getText(run.getTextPosition()); // Получаем текст из текущего XWPFRun
+                if (text != null && !text.trim().isEmpty()) { // Проверяем, что текст не является пустой
+                    // Получаем размер шрифта
+                    int fontSize = run.getFontSize();
+                    if (fontSize > 0) {
+                        style.append("font-size:").append(fontSize).append("pt;");
+                    }
+                    // Получаем название шрифта
+                    String fontFamily = run.getFontFamily();
+                    if (fontFamily != null && !fontFamily.trim().isEmpty()) {
+                        style.append("font-family:").append(fontFamily).append(";");
+                    }
+                    // Проверяем стили текста
+                    if (run.isBold()) {
+                        style.append("font-weight:bold;");
+                    }
+                    if (run.isItalic()) {
+                        style.append("font-style:italic;");
+                    }
+                    if (run.isStrikeThrough()) {
+                        style.append("text-decoration:line-through;");
+                    }
+                    // Получаем отступ абзаца
+                    int indentation = getIndentationLevel(paragraph);
+                    style.append(getParagraphAlignment(paragraph)).append("margin-left:").append(indentation).append("px;");
+                    System.out.println("Text " + text);
                 }
-                if (runF.isItalic()) {
-                    isItalic = true;
-                }
-                if (runF.isStrikeThrough()) {
-                    isStrikeThrough = true;
-                }
             }
-
-            // Добавляем стили текста
-            if (isBold) {
-                style.append("font-weight:bold;");
-            }
-            if (isItalic) {
-                style.append("font-style:italic;");
-            }
-            if (isStrikeThrough) {
-                style.append("text-decoration:line-through;");
-            }
-            style.append(getParagraphAlignment(paragraph));
         }
 
         return " style=\"" + style.toString() + "\"";
     }
-
-//    @FXML
-//    private void openDocument() {
-//        FileChooser fileChooser = new FileChooser();
-//        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Word Documents", "*.docx"));
-//        File file = fileChooser.showOpenDialog(htmlEditor.getScene().getWindow());
-//
-//        if (file != null) {
-//            try (FileInputStream fis = new FileInputStream(file)) {
-//                XWPFDocument document = new XWPFDocument(fis);
-//                StringBuilder htmlContent = new StringBuilder();
-//
-//
-//                // Проход по содержимому документа Word
-//                for (IBodyElement element : document.getBodyElements()) {
-//                    if (element instanceof XWPFParagraph) {
-//
-//                        // Обработка абзаца
-//                        XWPFParagraph paragraph = (XWPFParagraph) element;
-//                        htmlContent.append("<p>").append(paragraph.getText()).append("</p>");
-//                        System.out.println("**********" + paragraph.getText());
-//                        System.out.println("HTML_CONTENT" + htmlContent);
-//
-//
-//                    } else if (element instanceof XWPFTable) {
-//                        List<XWPFTable> tables = document.getTables();
-//                        for (XWPFTable table : tables) {
-//                            // Добавляем HTML-код для таблицы
-//                            htmlContent.append("<table border=\"1\">"); // Добавляем границы таблицы
-//                            for (XWPFTableRow row : table.getRows()) {
-//                                htmlContent.append("<tr>");
-//                                for (XWPFTableCell cell : row.getTableCells()) {
-//                                    // Добавляем HTML-код для ячеек таблицы
-//                                    htmlContent.append("<td>").append(cell.getText()).append("</td>");
-//                                }
-//                                htmlContent.append("</tr>");
-//                            }
-//                            htmlContent.append("</table>");
-//                        }
-////                        XWPFTable table = (XWPFTable) element;
-////                        htmlContent.append("<table>");
-////                        for (XWPFTableRow row : table.getRows()) {
-////                            htmlContent.append("<tr>");
-////                            for (XWPFTableCell cell : row.getTableCells()) {
-////                                htmlContent.append("<td>").append(cell.getText()).append("</td>");
-////                            }
-////                            htmlContent.append("</tr>");
-////                        }
-////                        htmlContent.append("</table>");
-//                    } else /*if (element instanceof XWPFPictureData)*/ {
-//
-//                        List<XWPFPictureData> pictures = document.getAllPictures();
-//                        for (XWPFPictureData picture : pictures) {
-//                            // Преобразование изображения в строку base64
-//                            String imageData = convertImageToBase64(picture.getData());
-//// Получение размеров изображения
-//                            int[] dimensions = getImageDimensions(picture.getData());
-//
-//                            // Вставка изображения в HTML-код с учетом размеров
-//                            htmlContent.append("<img src=\"data:image/png;base64,").append(imageData)
-//                                    .append("\" width=\"").append(dimensions[0]).append("\" height=\"").append(dimensions[1]).append("\">");
-//                        }
-//                    }}
-//                    for (XWPFParagraph paragraph : document.getParagraphs()) {
-//                        int fontSize = -1;
-//                        boolean isBold;
-//                        boolean isItalic;
-//
-//                        for (XWPFRun run : paragraph.getRuns()) {
-//                            String text = run.getText(0);
-//                            if (text != null && !text.isEmpty()) {
-//                                // Получаем информацию о шрифте из объекта XWPFRun
-//                                String fontFamily = paragraph.getRuns().get(0).getFontFamily();
-////                            if (fontFamily == null || fontFamily.isEmpty()) {
-////                                fontFamily = "Arial";
-////                            }
-//                                System.out.println(fontSize);
-//                                System.out.println(fontFamily);
-//                                fontSize = run.getFontSize();
-//                                isBold = run.isBold();
-//                                isItalic = run.isItalic();
-//
-//                                // Создаем HTML тег с текстом и примененными стилями
-//                                htmlContent.append("<span style=\"");
-//
-////                            if (fontFamily != null) {
-//                                htmlContent.append("font-family: ").append(fontFamily).append(";");
-////                            }
-////                            if (fontSize != -1) {
-//                                htmlContent.append("font-size: ").append(fontSize).append("pt;");
-////                            }
-//                                if (isBold) {
-//                                    htmlContent.append("font-weight: bold;");
-//                                }
-//                                if (isItalic) {
-//                                    htmlContent.append("font-style: italic;");
-//                                }
-//
-//                                htmlContent.append("\">").append(text).append("</span>");
-//                            }
-//                        }
-//
-//                        // Добавляем разрыв строки между абзацами
-//                        htmlContent.append("<br>");
-//
-//                }
-//
-//                String html = "<html><body>" + htmlContent + "</body></html>";
-//                htmlEditor.setHtmlText(html);
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
 
     private int[] getImageDimensions(byte[] imageData) throws IOException {
         BufferedImage img = ImageIO.read(new ByteArrayInputStream(imageData));
