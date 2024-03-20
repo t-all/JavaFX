@@ -4,6 +4,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 public class NameController {
 
@@ -33,27 +35,59 @@ public class NameController {
         boolean lastCharacter = soglasnye.contains(String.valueOf(firstName.charAt(firstName.length() - 1)));
         boolean lastCharacterY = firstName.endsWith("й");
 
-        String endName = "";
+        String nameDp = getNameDp(lastCharacter, lastCharacterY, firstName, middleName, lastName);
+        String nameVp = getNameVp(lastCharacter, lastCharacterY, firstName, middleName, lastName);
+
+        printName(nameVp, nameDp);
+    }
+
+    private static String getNameDp(boolean lastCharacter, boolean lastCharacterY, String firstName, String middleName, String lastName) {
+        String nameDp;
 
         if (lastCharacter && lastCharacterY) {
-            endName = firstName.substring(0, firstName.length() - 1) + "ю";
+            nameDp = firstName.substring(0, firstName.length() - 1) + "ю";
         } else {
-            endName = firstName + "у";
+            nameDp = firstName + "у";
         }
 
         if (!middleName.isEmpty()) {
-            endName += " " + middleName + "у";
+            nameDp += " " + middleName + "у";
         }
 
         if (!lastName.isEmpty()) {
-            endName += " " + lastName + "у";
+            nameDp += " " + lastName + "у";
         }
-
-        printName(endName);
+        return nameDp;
     }
 
-    private void printName(String endName) {
-        editedTextLabel.setText("Отредактированное имя: " + endName);
+    private static String getNameVp(boolean lastCharacter, boolean lastCharacterY, String firstName, String middleName, String lastName) {
+        String nameVp;
+
+        if (lastCharacter && lastCharacterY) {
+            nameVp = firstName.substring(0, firstName.length() - 1) + "я";
+        } else {
+            nameVp = firstName + "а";
+        }
+
+        if (!middleName.isEmpty()) {
+            nameVp += " " + middleName + "а";
+        }
+
+        if (!lastName.isEmpty()) {
+            nameVp += " " + lastName + "а";
+        }
+        return nameVp;
+    }
+
+    private void printName(String nameVp, String nameDp) {
+        String text = "Отредактированный текст: " +
+                "Разрешение выдано: Dp, для проведения работ Tp. После окончания работ принять у Vp выданный инвентарь";
+
+        text = text.replace("Vp", nameVp);
+        text = text.replace("Dp", nameDp);
+        text = text.replace("Tp", "молоток");
+
+        editedTextLabel.setText(text);
         editedTextLabel.setVisible(true);
     }
 

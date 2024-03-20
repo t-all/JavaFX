@@ -5,7 +5,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" spacing="10" prefHeight="200.0" prefWidth="400.0"  fx:controller="com.example.fx.NameController">
+<VBox xmlns:fx="http://javafx.com/fxml" spacing="10" prefHeight="400.0" prefWidth="700.0"  fx:controller="com.example.fx.NameController">
     <!-- Строка ввода текста -->
     <TextField fx:id="inputTextField" promptText="Введите текст"/>
 
